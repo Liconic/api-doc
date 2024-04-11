@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: "dados_telemetria"
+  description: 'API para consumir os dados do DynamoDB. Essa API utiliza o modelo de autorização Lambda. São necessários 3 query string params para consumir a api: mac, datainicio e datafim. A chave API_KEY está configurada como variável de ambiente da função Lambda "api_backend_authorizer". Também é possível listar os dispositivos cadastrados, utilizando /dados?macadresses=all'
+  version: "1.0.0"
+servers:
+  - description: Endpoint
+    url: https://taflgn4sai.execute-api.us-east-2.amazonaws.com/dev
+paths:
+  /dados:
+    get:
+      tags:
+        - Recurso /dados
+      summary: "Lista de parâmetros disponíveis. Lembrando que para consumir dados é necessário passar mac, datainicio e datafim, sem o macadresses. Para listar todos os macs é necessário usar macadresses=all, sem nenhum outro parâmetro."
+      parameters:
+        - name: mac
+          in: query
+          required: false
+          schema:
+            type: string
+          example: "12-34-56-78-9A-BC"
+        - name: datainicio
+          in: query
+          required: false
+          schema:
+            type: string
+          example: "01-04-2024"
+        - name: datafim
+          in: query
+          required: false
+          schema:
+            type: string
+          example: "08-04-2024"
+        - name: macadresses
+          in: query
+          required: false
+          schema:
+            type: string
+          example: "all"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json: {}
+      security:
+        - api_dados_telemetria_authorizer: []
+
+components:
+  securitySchemes:
+    api_dados_telemetria_authorizer:
+      type: apiKey
+      name: auth-token
+      in: header
+      x-amazon-apigateway-authtype: custom
