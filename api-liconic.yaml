@@ -1,16 +1,18 @@
 openapi: 3.0.0
 info:
-  title: "dados_telemetria"
-  description: 'API para consumir os dados do DynamoDB. Essa API utiliza o modelo de autorização Lambda. São necessários 3 query string params para consumir a api: mac, datainicio e datafim. A chave API_KEY está configurada como variável de ambiente da função Lambda "api_backend_authorizer". Também é possível listar os dispositivos cadastrados, utilizando /dados?macadresses=all'
+  title: "API - Liconic"
+  description: 'Atualmente temos dois recursos em nossa API, um para consumir os dados do DynamoDB e outro para Gestão de Clientes. O recurso /dados da api utiliza o modelo de autorização Lambda. São necessários 3 query string params para consumiro recurso /dados : mac, datainicio e datafim. A chave API_KEY está configurada como variável de ambiente da função Lambda "api_backend_authorizer". Também é possível listar os dispositivos cadastrados, utilizando /dados?macadresses=all. O recurso /clientes é um CRUD completo para gestão de clientes.'
   version: "1.0.0"
 servers:
-  - description: Endpoint
+  - description: Dados
     url: https://taflgn4sai.execute-api.us-east-2.amazonaws.com/dev
+  - description: Clientes
+    url: https://taflgn4sai.execute-api.us-east-2.amazonaws.com/dev/clientes
 paths:
   /dados:
     get:
       tags:
-        - Recurso /dados
+        - /dados
       summary: "Lista de parâmetros disponíveis. Lembrando que para consumir dados é necessário passar mac, datainicio e datafim, sem o macadresses. Para listar todos os macs é necessário usar macadresses=all, sem nenhum outro parâmetro."
       parameters:
         - name: mac
@@ -37,6 +39,99 @@ paths:
           schema:
             type: string
           example: "all"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json: {}
+      security:
+        - api_dados_telemetria_authorizer: []
+
+  /clientes:
+    get:
+      tags:
+        - /clientes
+      summary: "Lista os clientes e as suas informações"
+
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json: {}
+      security:
+        - api_dados_telemetria_authorizer: []
+
+    post:
+      tags:
+        - /clientes
+      summary: "Cadastra um novo cliente na base de dados"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: string
+                  example: '{"nome":"NomeDoCliente", "endereco":"EnderecoDoCliente", "telefone":"TelefoneDoCliente", "email":"EmailDoCliente", "dispositivos":"DeviceDoCliente" }'
+    
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json: {}
+      security:
+        - api_dados_telemetria_authorizer: []
+
+    put:
+      tags:
+        - /clientes
+      summary: "Atualiza os dados de um cliente na base de dados baseado em seu ID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: string
+                  example: '{"id":"idDeAlteracao", "nome":"NomeDoCliente", "endereco":"EnderecoDoCliente", "telefone":"TelefoneDoCliente", "email":"EmailDoCliente", "dispositivos":"DeviceDoCliente" }'
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json: {}
+      security:
+        - api_dados_telemetria_authorizer: []
+
+    delete:
+      tags:
+        - /clientes
+      summary: "Exclui um cliente na base de dados baseado em seu ID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: string
+                  example: '{"id":"idDeExclusao"}'
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json: {}
+      security:
+        - api_dados_telemetria_authorizer: []
+
+    head:
+      tags:
+        - /clientes
+      summary: "Verifica se a API está funcional, o Upertimerobot apenas verifica o statuscode 200, não é necessário nenhuma mensagem"
       responses:
         "200":
           description: "200 response"
