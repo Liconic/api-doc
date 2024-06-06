@@ -1,19 +1,31 @@
 openapi: 3.0.0
 info:
-  title: "API - Liconic"
-  description: 'Atualmente temos dois recursos em nossa API, um para consumir os dados do DynamoDB e outro para Gestão de Clientes. O recurso /dados da api utiliza o modelo de autorização Lambda. São necessários 3 query string params para consumiro recurso /dados : mac, datainicio e datafim. A chave API_KEY está configurada como variável de ambiente da função Lambda "api_backend_authorizer". Também é possível listar os dispositivos cadastrados, utilizando /dados?macadresses=all. O recurso /clientes é um CRUD completo para gestão de clientes.'
+  title: "liconic_telemetria"
+  description: 'API para a plataforma de telemetria/gestão de créditos de carbono da Liconic'
   version: "1.0.0"
 servers:
-  - description: Dados
+  - description:
     url: https://taflgn4sai.execute-api.us-east-2.amazonaws.com/dev
-  - description: Clientes
-    url: https://taflgn4sai.execute-api.us-east-2.amazonaws.com/dev/clientes
 paths:
+  /geradores:
+    get:
+      tags:
+        - /geradores
+      summary: "Lista os geradores (macaddresses)"
+
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json: {}
+      security:
+        - CognitoAuth: []
+
   /dados:
     get:
       tags:
         - /dados
-      summary: "Lista de parâmetros disponíveis. Lembrando que para consumir dados é necessário passar mac, datainicio e datafim, sem o macadresses. Para listar todos os macs é necessário usar macadresses=all, sem nenhum outro parâmetro."
+      summary: "Para consumir os dados é necessário informar o mac, datainicio e datafim."
       parameters:
         - name: mac
           in: query
@@ -33,20 +45,14 @@ paths:
           schema:
             type: string
           example: "08-04-2024"
-        - name: macadresses
-          in: query
-          required: false
-          schema:
-            type: string
-          example: "all"
       responses:
         "200":
           description: "200 response"
           content:
             application/json: {}
       security:
-        - api_dados_telemetria_authorizer: []
-
+        - CognitoAuth: []
+        
   /clientes:
     get:
       tags:
@@ -59,7 +65,7 @@ paths:
           content:
             application/json: {}
       security:
-        - api_dados_telemetria_authorizer: []
+        - CognitoAuth: []
 
     post:
       tags:
@@ -82,7 +88,7 @@ paths:
           content:
             application/json: {}
       security:
-        - api_dados_telemetria_authorizer: []
+        - CognitoAuth: []
 
     put:
       tags:
@@ -104,7 +110,7 @@ paths:
           content:
             application/json: {}
       security:
-        - api_dados_telemetria_authorizer: []
+        - CognitoAuth: []
 
     delete:
       tags:
@@ -126,7 +132,7 @@ paths:
           content:
             application/json: {}
       security:
-        - api_dados_telemetria_authorizer: []
+        - CognitoAuth: []
 
     head:
       tags:
@@ -138,12 +144,54 @@ paths:
           content:
             application/json: {}
       security:
-        - api_dados_telemetria_authorizer: []
+        - CognitoAuth: []
+
+  /creditos_carbono:
+    get:
+      tags:
+        - /creditos_carbono
+      summary: "Lista os créditos de carbono disponíveis para um gerador"
+      parameters:
+        - name: mac
+          in: query
+          required: false
+          schema:
+            type: string
+          example: "89-AB-CD-EF-00-11"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json: {}
+      security:
+        - CognitoAuth: []
+
+    put:
+      tags:
+        - /creditos_carbono
+      summary: "Consome os créditos e gera um token único, simulando a blockchain."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: string
+                  example: '{"mac": "89-AB-CD-EF-00-11", "creditos": 0.91}'
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json: {}
+      security:
+        - CognitoAuth: []
 
 components:
   securitySchemes:
-    api_dados_telemetria_authorizer:
+    CognitoAuth:
       type: apiKey
-      name: auth-token
+      name: CognitoAuth
       in: header
       x-amazon-apigateway-authtype: custom
